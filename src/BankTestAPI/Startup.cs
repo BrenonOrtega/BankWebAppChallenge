@@ -41,6 +41,9 @@ namespace BankTestAPI
             services.AddTransient<ITransactionRepository, TransactionRepository>();
             services.AddTransient<IAccountRepository, AccountRepository>();
 
+            services.AddTransient<IUserService, UserService>();
+            services.AddTransient<IAccountService, AccountService>();
+            services.AddTransient<ITransactionService, TransactionService>();
 
 
             services.AddDbContext<BankContext>(optionsBuilder =>
@@ -51,13 +54,21 @@ namespace BankTestAPI
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "BankTestAPI", Version = "v1" });
             });
-
-            services.AddScoped<IUserServices, UserServices>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, BankContext context)
         {
+            if(context.Database.CanConnect())
+            {
+                try {
+                    context.Database.Migrate();
+                } catch(Exception ex)
+                {
+                    Console.WriteLine("Critical: Unnable to apply migrations to database, please check connection information and retry");
+                }
+            }
+
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();

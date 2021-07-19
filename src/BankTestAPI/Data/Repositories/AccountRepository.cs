@@ -68,7 +68,7 @@ namespace BankTestAPI.Data.Repositories
                 var toBeUpdatedEntity = _context.Accounts.Single(account => account.Id.Equals(updatedEntity.Id));
                 toBeUpdatedEntity = updatedEntity;
                             
-                _context.Update(toBeUpdatedEntity);
+                _context.Accounts.Update(toBeUpdatedEntity);
                 await _context.SaveChangesAsync();
 
                 return true;

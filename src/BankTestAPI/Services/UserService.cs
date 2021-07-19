@@ -1,23 +1,21 @@
+using AutoMapper;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 using BankTestAPI.Dtos;
 using BankTestAPI.Models;
 using BankTestAPI.Data.Repositories.Interfaces;
-using AutoMapper;
 using BankTestAPI.Services.Interfaces;
 
 namespace BankTestAPI.Services
 {
-    
-
-    public class UserServices : IUserServices
+    public class UserService : IUserService
     {
         private readonly IUserRepository _users;
         private readonly IAccountRepository _accounts;
         private readonly IMapper _mapper;
 
-        public UserServices(IUserRepository users, IAccountRepository accounts, IMapper mapper)
+        public UserService(IUserRepository users, IAccountRepository accounts, IMapper mapper)
         {
             _users = users;
             _accounts = accounts;

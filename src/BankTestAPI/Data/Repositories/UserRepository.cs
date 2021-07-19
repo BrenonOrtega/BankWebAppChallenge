@@ -75,14 +75,13 @@ namespace BankTestAPI.Data.Repositories
             }
         }
 
-        public async Task<bool> Update(User updatedEntity)
+        public async Task<bool> Update(User updatedUser)
         {
             try
             {
-                var toBeUpdatedEntity = _context.Users.Single(account => account.Id.Equals(updatedEntity.Id));
-                toBeUpdatedEntity = updatedEntity;
+                var actualUser = _context.Users.Single(account => account.Id.Equals(updatedUser.Id));
 
-                _context.Update(toBeUpdatedEntity);
+                _context.Users.Update(actualUser);
                 await _context.SaveChangesAsync();
 
                 return true;

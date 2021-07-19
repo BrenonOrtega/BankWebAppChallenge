@@ -1,0 +1,28 @@
+version: "3.9"
+services: 
+    db:
+        image: postgres
+        restart: "no"
+        ports:
+            - "5431:5432"
+        environment:
+            - POSTGRES_PASSWORD=admin
+            - POSTGRES_USER=admin
+        networks:
+            - api-network
+        deploy:
+            resources:
+                limits:
+                    memory: 350M
+
+    adminer:
+        image: adminer
+        ports: 
+            - "8080:8080"
+        depends_on: 
+            - db
+        networks:
+            - api-network
+
+networks:
+    api-network:

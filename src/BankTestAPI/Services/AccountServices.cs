@@ -1,31 +1,46 @@
+using AutoMapper;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 using BankTestAPI.Dtos;
 using BankTestAPI.Models;
+using BankTestAPI.Services.Interfaces;
 using BankTestAPI.Data.Repositories.Interfaces;
-using AutoMapper;
+using System;
 
 namespace BankTestAPI.Services
 {
-    public class AccountServices
+    public class AccountService : IAccountService
    {
         private readonly IUserRepository _users;
+
         private readonly IAccountRepository _accounts;
-        private readonly Mapper _mapper;
-        public AccountServices(IUserRepository users, IAccountRepository accounts, Mapper mapper)
+
+        private readonly ITransactionRepository _transactions;
+
+        private readonly IMapper _mapper;
+
+        public AccountService(IUserRepository users, IAccountRepository accounts, IMapper mapper)
         {
             _users = users;
             _accounts = accounts;
             _mapper = mapper;
         }
 
-        public async Task RegisterAccount(AccountDto accountDto)
+        public async Task<bool> RegisterAccount(AccountDto accountDto)
         {
-            var account = _mapper.Map<Account>(accountDto);
-            account.Owner = await _users.GetByAccountId(accountDto.Id);
+            var owner = await _users.GetById(accountDto.OwnerId);
 
-            await _accounts.Create(account);
+            if(owner.Id != 0)
+            {
+                var createdAccount = new Account(){ Owner = owner };
+                await _accounts.Create(createdAccount);
+                
+                owner.Account = createdAccount;
+                await _users.Update(owner);
+                return true;
+            }
+            return false;
         }
 
         public async Task<AccountDto> GetAccountById(int id)
@@ -33,7 +48,7 @@ namespace BankTestAPI.Services
             var account = await _accounts.GetById(id);
             
             var mappedAccount = _mapper.Map<AccountDto>(account);
-            mappedAccount.OwnerId = account.Owner.Id;
+            mappedAccount.OwnerId = account.OwnerId;
 
             return mappedAccount;
         }
@@ -44,24 +59,20 @@ namespace BankTestAPI.Services
             var mappedAccounts = accounts.Select(account => 
             {
                 var mappedAccount = _mapper.Map<AccountDto>(account);
-                mappedAccount.OwnerId = account.Owner.Id;
-                
+                mappedAccount.OwnerId = account.OwnerId;
+
                 return mappedAccount;
             });
 
            return mappedAccounts;
         }
 
-        public async Task<bool> UpdateAccount(int id, AccountDto accountDto)
-        {
-            var updatedAccount = _mapper.Map<Account>(accountDto);
-            updatedAccount.Owner = await _users.GetByAccountId(id);
-
-            return await _accounts.Update(updatedAccount);
-        }
-
         public async Task<bool> DeleteAccount(int id)
         {
+            var account = await _accounts.GetById(id);
+            if (account.Balance != decimal.Zero)
+                throw new InvalidOperationException("Unnable to delete an account that has Balance");
+
             return await _accounts.Delete(id);
         }
     }

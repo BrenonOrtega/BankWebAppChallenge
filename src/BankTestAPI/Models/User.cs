@@ -1,3 +1,4 @@
+using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -13,9 +14,15 @@ namespace BankTestAPI.Models
 
         [Required, EmailAddress]
         public string Email { get; set; }
-
-        public int AccountId { get; set; }
-
         public Account Account { get; set; }
+        
+
+        internal void Update(User updatedUser)
+        {
+            Account = updatedUser.Account;
+            Email = updatedUser.Email;
+            LastName = updatedUser.LastName;
+            FirstName = updatedUser.LastName;
+        }
     }
 }

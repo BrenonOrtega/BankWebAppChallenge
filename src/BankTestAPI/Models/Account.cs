@@ -14,11 +14,14 @@ namespace BankTestAPI.Models
         [ForeignKey(nameof(OwnerId))]
         public User Owner { get; set; }
 
-        [InverseProperty(nameof(Transaction.Account))]
-        public List<Transaction> Transactions { get; set; }
+        public ICollection<Transaction> Transactions { get; set; }
 
+        public Account()
+        {
+            Transactions = new List<Transaction>();
+        }
 
-        public bool Withdraw(Transaction transaction) 
+        internal bool Withdraw(Transaction transaction) 
         {
             if(TransactionType.Debit.Equals(transaction.Type))
             {
@@ -30,7 +33,7 @@ namespace BankTestAPI.Models
             return false;
         }
 
-       public bool Deposit(Transaction transaction) 
+       internal bool Deposit(Transaction transaction) 
         {
             if(TransactionType.Credit.Equals(transaction.Type))
             {

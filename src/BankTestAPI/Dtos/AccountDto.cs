@@ -1,3 +1,6 @@
+using System;
+using System.Collections.Generic;
+
 namespace BankTestAPI.Dtos
 {
     public class AccountDto
@@ -6,7 +9,17 @@ namespace BankTestAPI.Dtos
 
         public decimal Balance { get; private set; }
 
-        public int OwnerId { get; set; }
+        [NonSerialized]
+        public int OwnerId;
+
+        public UserDto Owner { get; set;}
+
+        public List<TransactionDto> Transactions { get; set;}
+
+        public AccountDto()
+        {
+            Transactions = new();
+        }
 
         public bool IsEmpty()
         {

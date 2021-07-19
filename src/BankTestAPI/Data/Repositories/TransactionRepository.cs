@@ -27,7 +27,7 @@ namespace BankTestAPI.Data.Repositories
                 transaction.CreatedAt.Date.Equals(transactionDate.Date)
             );
 
-            return await Task.FromResult(transactions);
+            return await Task.FromResult(transactions.ToList());
         }
 
         public async Task<Transaction> GetById(int id)
@@ -63,7 +63,7 @@ namespace BankTestAPI.Data.Repositories
                 var toBeUpdatedEntity = _context.Transactions.Single(account => account.Id.Equals(updatedEntity.Id));
                 toBeUpdatedEntity = updatedEntity;
 
-                _context.Update(toBeUpdatedEntity);
+                _context.Transactions.Update(toBeUpdatedEntity);
                 await _context.SaveChangesAsync();
 
                 return true;
@@ -93,7 +93,7 @@ namespace BankTestAPI.Data.Repositories
         public async Task<IEnumerable<Transaction>> GetByAccountId(int accountId)
         {
             var userTransactions = _context.Transactions.Where(transaction => accountId.Equals(transaction.Account.Id));
-            return await Task.FromResult(userTransactions);
+            return await Task.FromResult(userTransactions.ToList());
         }
     }
 }

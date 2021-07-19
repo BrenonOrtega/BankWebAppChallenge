@@ -6,18 +6,20 @@ using BankTestAPI.Models;
 using BankTestAPI.Models.Enum;
 using BankTestAPI.Data.Repositories.Interfaces;
 using AutoMapper;
+using BankTestAPI.Services.Interfaces;
+using System.Linq;
 
 namespace BankTestAPI.Services
 {
-    public class TransactionServices
+    public class TransactionService : ITransactionService
     {
         private readonly ITransactionRepository _transactions;
 
         private readonly IAccountRepository _accounts;
 
-        private readonly Mapper _mapper;
+        private readonly IMapper _mapper;
 
-        public TransactionServices(ITransactionRepository transactions, IAccountRepository accounts, Mapper mapper)
+        public TransactionService(ITransactionRepository transactions, IAccountRepository accounts, IMapper mapper)
         {
             _transactions = transactions;
             _accounts = accounts;
@@ -27,6 +29,8 @@ namespace BankTestAPI.Services
         public async Task<bool> Deposit(TransactionDto transactionDto)
         {
             var transaction = _mapper.Map<Transaction>(transactionDto);
+            transaction.Type = transactionDto.transactionType;
+
             transaction.Account = await _accounts.GetById(transactionDto.AccountId);
 
             var executed = transaction.Account.Deposit(transaction);
@@ -34,7 +38,6 @@ namespace BankTestAPI.Services
             if (executed)
             {
                 await _transactions.Create(transaction);
-                await _accounts.Update(transaction.Account);
             }
 
             return executed;
@@ -50,7 +53,6 @@ namespace BankTestAPI.Services
             if (executed)
             {
                 await _transactions.Create(transaction);
-                await _accounts.Update(transaction.Account);
             }
 
             return executed;
@@ -65,7 +67,6 @@ namespace BankTestAPI.Services
             {
                 CreatedAt = DateTime.Now,
                 Account = sourceAccount,
-                RelatedAccount = destinationAccount,
                 Type = TransactionType.Debit,
                 Value = value,
             };
@@ -74,7 +75,6 @@ namespace BankTestAPI.Services
             {
                 CreatedAt = DateTime.Now,
                 Account = destinationAccount,
-                RelatedAccount = sourceAccount,
                 Type = TransactionType.Credit,
                 Value = value,
             };
@@ -93,18 +93,39 @@ namespace BankTestAPI.Services
             return executed;
         }
 
-        public async Task<IEnumerable<Transaction>> GetAllByUser(int accountId)
+        public async Task<IEnumerable<TransactionDto>> GetAllByUser(int accountId)
         {
             var userTransactions = await _transactions.GetByAccountId(accountId);
+            var mappedTransactions = userTransactions.Select(t => {
+                var mappedTransaction = new TransactionDto() {
+                    Id = t.Id,
+                    AccountId = t.AccountId,
+                    Value = t.Value,
+                    TransactionType = t.Type.ToString(),
+                    CreatedAt = t.CreatedAt,
+                };
+                return mappedTransaction;
+            });
 
-            return userTransactions;
+            return mappedTransactions;
         }
 
-        public async Task<IEnumerable<Transaction>> GetByDate(DateTime transactionsDate)
+        public async Task<IEnumerable<TransactionDto>> GetByDate(DateTime transactionsDate)
         {
             var datedTransactions = await _transactions.GetByDate(transactionsDate);
+            
+            var mappedTransactions = datedTransactions.Select(t => {
+                var mappedTransaction = new TransactionDto() {
+                    Id = t.Id,
+                    AccountId = t.AccountId,
+                    Value = t.Value,
+                    TransactionType = t.Type.ToString(),
+                    CreatedAt = t.CreatedAt,
+                };
+                return mappedTransaction;
+            });
 
-            return datedTransactions;
+            return mappedTransactions;
         }
     }
 }

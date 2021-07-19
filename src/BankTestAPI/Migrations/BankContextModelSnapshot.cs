@@ -53,9 +53,6 @@ namespace BankTestAPI.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp without time zone");
 
-                    b.Property<int>("RelatedAccountId")
-                        .HasColumnType("integer");
-
                     b.Property<int>("Type")
                         .HasColumnType("integer");
 
@@ -66,8 +63,6 @@ namespace BankTestAPI.Migrations
 
                     b.HasIndex("AccountId");
 
-                    b.HasIndex("RelatedAccountId");
-
                     b.ToTable("Transactions");
                 });
 
@@ -77,9 +72,6 @@ namespace BankTestAPI.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("integer")
                         .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
-
-                    b.Property<int>("AccountId")
-                        .HasColumnType("integer");
 
                     b.Property<string>("Email")
                         .IsRequired()
@@ -119,15 +111,7 @@ namespace BankTestAPI.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("BankTestAPI.Models.Account", "RelatedAccount")
-                        .WithMany()
-                        .HasForeignKey("RelatedAccountId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.Navigation("Account");
-
-                    b.Navigation("RelatedAccount");
                 });
 
             modelBuilder.Entity("BankTestAPI.Models.Account", b =>
